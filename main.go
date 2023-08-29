@@ -6,6 +6,9 @@ import (
 
 	gcloud "terraform-provider-genesyscloud/genesyscloud"
 	externalContacts "terraform-provider-genesyscloud/genesyscloud/external_contacts"
+	integration "terraform-provider-genesyscloud/genesyscloud/integration"
+	integrationAction "terraform-provider-genesyscloud/genesyscloud/integration_action"
+	mrp "terraform-provider-genesyscloud/genesyscloud/media_retention_policy"
 	ob "terraform-provider-genesyscloud/genesyscloud/outbound"
 	obAttemptLimit "terraform-provider-genesyscloud/genesyscloud/outbound_attempt_limit"
 	obContactList "terraform-provider-genesyscloud/genesyscloud/outbound_contact_list"
@@ -86,6 +89,9 @@ func registerResources() {
 	obRuleset.SetRegistrar(reg_instance)
 	scripts.SetRegistrar(reg_instance)
 	externalContacts.SetRegistrar(reg_instance)
+	integration.SetRegistrar(reg_instance)
+	integrationAction.SetRegistrar(reg_instance)
+	mrp.SetRegistrar(reg_instance)
 	resourceExporter.SetRegisterExporter(resourceExporters)
 
 	// setting resources for Use cases  like TF export where provider is used in resource classes.
