@@ -1,9 +1,11 @@
-package genesyscloud
+package integration_action
 
 import (
 	"context"
 	"fmt"
 	"time"
+
+	gcloud "terraform-provider-genesyscloud/genesyscloud"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -11,27 +13,13 @@ import (
 	"github.com/mypurecloud/platform-client-sdk-go/v105/platformclientv2"
 )
 
-func dataSourceIntegrationAction() *schema.Resource {
-	return &schema.Resource{
-		Description: "Data source for Genesys Cloud integration action. Select an integration action by name",
-		ReadContext: ReadWithPooledClient(dataSourceIntegrationActionRead),
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Description: "The name of the integration action",
-				Type:        schema.TypeString,
-				Required:    true,
-			},
-		},
-	}
-}
-
-func dataSourceIntegrationActionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	sdkConfig := m.(*ProviderMeta).ClientConfig
+func DataSourceIntegrationActionRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
+	sdkConfig := m.(*gcloud.ProviderMeta).ClientConfig
 	integrationAPI := platformclientv2.NewIntegrationsApiWithConfig(sdkConfig)
 
 	actionName := d.Get("name").(string)
 
-	return WithRetries(ctx, 15*time.Second, func() *resource.RetryError {
+	return gcloud.WithRetries(ctx, 15*time.Second, func() *resource.RetryError {
 		for pageNum := 1; ; pageNum++ {
 			const pageSize = 100
 			integrationAction, _, getErr := integrationAPI.GetIntegrationsActions(pageSize, pageNum, "", "", "", "", "", actionName, "", "", "")

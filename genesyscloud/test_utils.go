@@ -168,7 +168,7 @@ func StrArrayEquals(a, b []string) bool {
 	return true
 }
 
-func validateValueInJsonAttr(resourceName string, attrName string, jsonProp string, jsonValue string) resource.TestCheckFunc {
+func ValidateValueInJsonAttr(resourceName string, attrName string, jsonProp string, jsonValue string) resource.TestCheckFunc {
 	return func(state *terraform.State) error {
 		resourceState, ok := state.RootModule().Resources[resourceName]
 		if !ok {
@@ -338,6 +338,30 @@ func GenerateSubstitutionsMap(substitutions map[string]string) string {
 	}
 	return fmt.Sprintf(`substitutions = {
 %s}`, substitutionsStr)
+}
+
+func GenerateJsonSchemaDocStr(properties ...string) string {
+	attrType := "type"
+	attrProperties := "properties"
+	typeObject := "object"
+	typeStr := "string" // All string props
+
+	propStrs := []string{}
+	for _, prop := range properties {
+		propStrs = append(propStrs, GenerateJsonProperty(prop, generateJsonObject(
+			GenerateJsonProperty(attrType, strconv.Quote(typeStr)),
+		)))
+	}
+	allProps := strings.Join(propStrs, "\n")
+
+	return GenerateJsonEncodedProperties(
+		// First field is required
+		generateJsonArrayProperty("required", strconv.Quote(properties[0])),
+		GenerateJsonProperty(attrType, strconv.Quote(typeObject)),
+		GenerateJsonProperty(attrProperties, generateJsonObject(
+			allProps,
+		)),
+	)
 }
 
 func randString(length int) string {

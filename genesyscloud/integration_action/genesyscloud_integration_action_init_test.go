@@ -1,4 +1,4 @@
-package media_retention_policy
+package integration_action
 
 import (
 	"sync"
@@ -30,7 +30,7 @@ func (r *registerTestInstance) registerTestResources() {
 	r.resourceMapMutex.Lock()
 	defer r.resourceMapMutex.Unlock()
 
-	providerResources["genesyscloud_integration"] = ResourceIntegration()
+	providerResources["genesyscloud_integration_action"] = ResourceIntegrationAction()
 
 }
 
@@ -39,7 +39,7 @@ func (r *registerTestInstance) registerTestDataSources() {
 	r.datasourceMapMutex.Lock()
 	defer r.datasourceMapMutex.Unlock()
 
-	providerDataSources["genesyscloud_integration"] = DataSourceIntegration()
+	providerDataSources["genesyscloud_integration_action"] = DataSourceIntegrationAction()
 
 }
 
