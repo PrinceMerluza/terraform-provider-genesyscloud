@@ -1,9 +1,11 @@
-package genesyscloud
+package integration
 
 import (
 	"fmt"
 	"strconv"
 	"testing"
+
+	gcloud "terraform-provider-genesyscloud/genesyscloud"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -20,8 +22,8 @@ func TestAccDataSourceIntegrationCredential(t *testing.T) {
 	)
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { TestAccPreCheck(t) },
-		ProviderFactories: GetProviderFactories(providerResources, providerDataSources),
+		PreCheck:          func() { gcloud.TestAccPreCheck(t) },
+		ProviderFactories: gcloud.GetProviderFactories(providerResources, providerDataSources),
 		Steps: []resource.TestStep{
 			{
 				// Create
@@ -30,7 +32,7 @@ func TestAccDataSourceIntegrationCredential(t *testing.T) {
 					strconv.Quote(credName1),
 					strconv.Quote(typeName1),
 					generateCredentialFields(
-						generateMapProperty(key1, strconv.Quote(val1)),
+						gcloud.GenerateMapProperty(key1, strconv.Quote(val1)),
 					),
 				) + generateIntegrationCredentialDataSource(credResource2,
 					credName1,

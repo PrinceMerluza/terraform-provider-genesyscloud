@@ -1,4 +1,4 @@
-package genesyscloud
+package integration
 
 import (
 	"context"
@@ -10,10 +10,12 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
+	gcloud "terraform-provider-genesyscloud/genesyscloud"
+	resourceExporter "terraform-provider-genesyscloud/genesyscloud/resource_exporter"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mypurecloud/platform-client-sdk-go/v105/platformclientv2"
-	resourceExporter "terraform-provider-genesyscloud/genesyscloud/resource_exporter"
 )
 
 func getAllCredentials(_ context.Context, clientConfig *platformclientv2.Configuration) (resourceExporter.ResourceIDMetaMap, diag.Diagnostics) {
@@ -41,57 +43,12 @@ func getAllCredentials(_ context.Context, clientConfig *platformclientv2.Configu
 	return resources, nil
 }
 
-func CredentialExporter() *resourceExporter.ResourceExporter {
-	return &resourceExporter.ResourceExporter{
-		GetResourcesFunc: GetAllWithPooledClient(getAllCredentials),
-		RefAttrs:         map[string]*resourceExporter.RefAttrSettings{}, // No Reference
-		UnResolvableAttributes: map[string]*schema.Schema{
-			"fields": ResourceCredential().Schema["fields"],
-		},
-	}
-}
-
-func ResourceCredential() *schema.Resource {
-	return &schema.Resource{
-		Description: "Genesys Cloud Credential",
-
-		CreateContext: CreateWithPooledClient(createCredential),
-		ReadContext:   ReadWithPooledClient(readCredential),
-		UpdateContext: UpdateWithPooledClient(updateCredential),
-		DeleteContext: DeleteWithPooledClient(deleteCredential),
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
-		SchemaVersion: 1,
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Description: "Credential name.",
-				Type:        schema.TypeString,
-				Optional:    true,
-			},
-			"credential_type_name": {
-				Description: "Credential type name. Use [GET /api/v2/integrations/credentials/types](https://developer.genesys.cloud/api/rest/v2/integrations/#get-api-v2-integrations-credentials-types) to see the list of available integration credential types. ",
-				Type:        schema.TypeString,
-				Required:    true,
-			},
-			"fields": {
-				Description: "Credential fields. Different credential types require different fields. Missing any correct required fields will result API request failure. Use [GET /api/v2/integrations/credentials/types](https://developer.genesys.cloud/api/rest/v2/integrations/#get-api-v2-integrations-credentials-types) to check out the specific credential type schema to find out what fields are required. ",
-				Type:        schema.TypeMap,
-				Optional:    true,
-				Computed:    true,
-				Sensitive:   true,
-				Elem:        &schema.Schema{Type: schema.TypeString},
-			},
-		},
-	}
-}
-
 func createCredential(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
 	name := d.Get("name").(string)
 	cred_type := d.Get("credential_type_name").(string)
 
-	sdkConfig := meta.(*ProviderMeta).ClientConfig
+	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
 	integrationAPI := platformclientv2.NewIntegrationsApiWithConfig(sdkConfig)
 
 	createCredential := platformclientv2.Credential{
@@ -115,15 +72,15 @@ func createCredential(ctx context.Context, d *schema.ResourceData, meta interfac
 }
 
 func readCredential(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	sdkConfig := meta.(*ProviderMeta).ClientConfig
+	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
 	integrationAPI := platformclientv2.NewIntegrationsApiWithConfig(sdkConfig)
 
 	log.Printf("Reading credential %s", d.Id())
 
-	return WithRetriesForRead(ctx, d, func() *resource.RetryError {
+	return gcloud.WithRetriesForRead(ctx, d, func() *resource.RetryError {
 		currentCredential, resp, getErr := integrationAPI.GetIntegrationsCredential(d.Id())
 		if getErr != nil {
-			if IsStatus404(resp) {
+			if gcloud.IsStatus404(resp) {
 				return resource.RetryableError(fmt.Errorf("Failed to read credential %s: %s", d.Id(), getErr))
 			}
 			return resource.NonRetryableError(fmt.Errorf("Failed to read credential %s: %s", d.Id(), getErr))
@@ -143,7 +100,7 @@ func updateCredential(ctx context.Context, d *schema.ResourceData, meta interfac
 	name := d.Get("name").(string)
 	cred_type := d.Get("credential_type_name").(string)
 
-	sdkConfig := meta.(*ProviderMeta).ClientConfig
+	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
 	integrationAPI := platformclientv2.NewIntegrationsApiWithConfig(sdkConfig)
 
 	if d.HasChanges("name", "credential_type_name", "fields") {
@@ -167,7 +124,7 @@ func updateCredential(ctx context.Context, d *schema.ResourceData, meta interfac
 }
 
 func deleteCredential(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	sdkConfig := meta.(*ProviderMeta).ClientConfig
+	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
 	integrationAPI := platformclientv2.NewIntegrationsApiWithConfig(sdkConfig)
 
 	_, err := integrationAPI.DeleteIntegrationsCredential(d.Id())
@@ -175,10 +132,10 @@ func deleteCredential(ctx context.Context, d *schema.ResourceData, meta interfac
 		return diag.Errorf("Failed to delete the credential %s: %s", d.Id(), err)
 	}
 
-	return WithRetries(ctx, 30*time.Second, func() *resource.RetryError {
+	return gcloud.WithRetries(ctx, 30*time.Second, func() *resource.RetryError {
 		_, resp, err := integrationAPI.GetIntegrationsCredential(d.Id())
 		if err != nil {
-			if IsStatus404(resp) {
+			if gcloud.IsStatus404(resp) {
 				// Integration credential deleted
 				log.Printf("Deleted Integration credential %s", d.Id())
 				return nil

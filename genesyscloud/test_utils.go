@@ -299,14 +299,14 @@ func validateValueInJsonPropertiesAttr(resourceName string, attrName string, jso
 	}
 }
 
-func generateJsonEncodedProperties(properties ...string) string {
+func GenerateJsonEncodedProperties(properties ...string) string {
 	return fmt.Sprintf(`jsonencode({
 		%s
 	})
 	`, strings.Join(properties, "\n"))
 }
 
-func generateJsonProperty(propName string, propValue string) string {
+func GenerateJsonProperty(propName string, propValue string) string {
 	return fmt.Sprintf(`"%s" = %s`, propName, propValue)
 }
 
@@ -320,11 +320,11 @@ func generateJsonObject(properties ...string) string {
 	}`, strings.Join(properties, "\n"))
 }
 
-func generateMapProperty(propName string, propValue string) string {
+func GenerateMapProperty(propName string, propValue string) string {
 	return fmt.Sprintf(`%s = %s`, propName, propValue)
 }
 
-func generateMapAttr(name string, properties ...string) string {
+func GenerateMapAttr(name string, properties ...string) string {
 	return fmt.Sprintf(`%s = {
 		%s
 	}

@@ -1,9 +1,11 @@
-package genesyscloud
+package media_retention_policy
 
 import (
 	"context"
 	"fmt"
 	"time"
+
+	gcloud "terraform-provider-genesyscloud/genesyscloud"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -11,27 +13,13 @@ import (
 	"github.com/mypurecloud/platform-client-sdk-go/v105/platformclientv2"
 )
 
-func dataSourceRecordingMediaRetentionPolicy() *schema.Resource {
-	return &schema.Resource{
-		Description: "Data source for Genesys Cloud media retention policy. Select a policy by name",
-		ReadContext: ReadWithPooledClient(dataSourceRecordingMediaRetentionPolicyRead),
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Description: "Media retention policy name.",
-				Type:        schema.TypeString,
-				Required:    true,
-			},
-		},
-	}
-}
-
 func dataSourceRecordingMediaRetentionPolicyRead(ctx context.Context, d *schema.ResourceData, m interface{}) diag.Diagnostics {
-	sdkConfig := m.(*ProviderMeta).ClientConfig
+	sdkConfig := m.(*gcloud.ProviderMeta).ClientConfig
 	recordingAPI := platformclientv2.NewRecordingApiWithConfig(sdkConfig)
 
 	name := d.Get("name").(string)
 
-	return WithRetries(ctx, 15*time.Second, func() *resource.RetryError {
+	return gcloud.WithRetries(ctx, 15*time.Second, func() *resource.RetryError {
 		for pageNum := 1; ; pageNum++ {
 			const pageSize = 100
 			policy, _, getErr := recordingAPI.GetRecordingMediaretentionpolicies(pageSize, pageNum, "", nil, "", "", name, true, false, false, 0)

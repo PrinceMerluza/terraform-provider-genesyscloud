@@ -17,13 +17,13 @@ func TestAccDataSourceQualityFormsSurvey(t *testing.T) {
 	)
 
 	// Most basic survey form
-	surveyForm1 := surveyFormStruct{
+	surveyForm1 := SurveyFormStruct{
 		name:     formName,
 		language: "en-US",
-		questionGroups: []surveyFormQuestionGroupStruct{
+		questionGroups: []SurveyFormQuestionGroupStruct{
 			{
 				name: "Test Question Group 1",
-				questions: []surveyFormQuestionStruct{
+				questions: []SurveyFormQuestionStruct{
 					{
 						text:    "Was your problem solved?",
 						varType: "multipleChoiceQuestion",
@@ -66,7 +66,7 @@ func TestAccDataSourceQualityFormsSurvey(t *testing.T) {
 		ProviderFactories: GetProviderFactories(providerResources, providerDataSources),
 		Steps: []resource.TestStep{
 			{
-				Config: generateSurveyFormResource(
+				Config: GenerateSurveyFormResource(
 					formResource, &surveyForm1,
 				) + generateQualityFormsSurveyDataSource(
 					formDataResource,

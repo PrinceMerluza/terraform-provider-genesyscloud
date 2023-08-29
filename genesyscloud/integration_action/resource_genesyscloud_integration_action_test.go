@@ -50,7 +50,7 @@ func TestAccResourceIntegrationAction(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create an integration and an associated action
-				Config: generateIntegrationResource(
+				Config: GenerateIntegrationResource(
 					integResource1,
 					nullValue,
 					strconv.Quote(integTypeID),
@@ -89,7 +89,7 @@ func TestAccResourceIntegrationAction(t *testing.T) {
 			},
 			{
 				// Update action name, category, timeout, and request/response config
-				Config: generateIntegrationResource(
+				Config: GenerateIntegrationResource(
 					integResource1,
 					nullValue,
 					strconv.Quote(integTypeID),
@@ -106,20 +106,20 @@ func TestAccResourceIntegrationAction(t *testing.T) {
 						reqUrlTemplate2,
 						reqType2,
 						strconv.Quote(reqTemp),
-						generateMapAttr(
+						GenerateMapAttr(
 							"headers",
-							generateMapProperty(headerKey, strconv.Quote(headerVal1)),
+							GenerateMapProperty(headerKey, strconv.Quote(headerVal1)),
 						),
 					),
 					generateIntegrationActionConfigResponse(
 						strconv.Quote(successTemplate),
-						generateMapAttr(
+						GenerateMapAttr(
 							"translation_map",
-							generateMapProperty(transMapAttr, strconv.Quote(transMapVal1)),
+							GenerateMapProperty(transMapAttr, strconv.Quote(transMapVal1)),
 						),
-						generateMapAttr(
+						GenerateMapAttr(
 							"translation_map_defaults",
-							generateMapProperty(transMapAttr, strconv.Quote(transMapValDefault1)),
+							GenerateMapProperty(transMapAttr, strconv.Quote(transMapValDefault1)),
 						),
 					),
 				),
@@ -140,7 +140,7 @@ func TestAccResourceIntegrationAction(t *testing.T) {
 			},
 			{
 				// Update config values as well as secure field which should force a new action to be created
-				Config: generateIntegrationResource(
+				Config: GenerateIntegrationResource(
 					integResource1,
 					nullValue,
 					strconv.Quote(integTypeID),
@@ -157,20 +157,20 @@ func TestAccResourceIntegrationAction(t *testing.T) {
 						reqUrlTemplate2,
 						reqType2,
 						strconv.Quote(reqTemp),
-						generateMapAttr(
+						GenerateMapAttr(
 							"headers",
-							generateMapProperty(headerKey, strconv.Quote(headerVal2)),
+							GenerateMapProperty(headerKey, strconv.Quote(headerVal2)),
 						),
 					),
 					generateIntegrationActionConfigResponse(
 						strconv.Quote(successTemplate),
-						generateMapAttr(
+						GenerateMapAttr(
 							"translation_map",
-							generateMapProperty(transMapAttr, strconv.Quote(transMapVal2)),
+							GenerateMapProperty(transMapAttr, strconv.Quote(transMapVal2)),
 						),
-						generateMapAttr(
+						GenerateMapAttr(
 							"translation_map_defaults",
-							generateMapProperty(transMapAttr, strconv.Quote(transMapValDefault2)),
+							GenerateMapProperty(transMapAttr, strconv.Quote(transMapValDefault2)),
 						),
 					),
 				),
@@ -229,30 +229,6 @@ func generateIntegrationActionConfigResponse(successTemp string, blocks ...strin
         %s
 	}
 	`, successTemp, strings.Join(blocks, "\n"))
-}
-
-func generateJsonSchemaDocStr(properties ...string) string {
-	attrType := "type"
-	attrProperties := "properties"
-	typeObject := "object"
-	typeStr := "string" // All string props
-
-	propStrs := []string{}
-	for _, prop := range properties {
-		propStrs = append(propStrs, generateJsonProperty(prop, generateJsonObject(
-			generateJsonProperty(attrType, strconv.Quote(typeStr)),
-		)))
-	}
-	allProps := strings.Join(propStrs, "\n")
-
-	return generateJsonEncodedProperties(
-		// First field is required
-		generateJsonArrayProperty("required", strconv.Quote(properties[0])),
-		generateJsonProperty(attrType, strconv.Quote(typeObject)),
-		generateJsonProperty(attrProperties, generateJsonObject(
-			allProps,
-		)),
-	)
 }
 
 func testVerifyIntegrationActionDestroyed(state *terraform.State) error {

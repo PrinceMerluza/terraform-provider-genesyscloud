@@ -94,7 +94,7 @@ func TestAccResourceGroupAddresses(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create
-				Config: generateBasicGroupResource(
+				Config: GenerateBasicGroupResource(
 					groupResource1,
 					groupName,
 					generateGroupAddress(
@@ -111,7 +111,7 @@ func TestAccResourceGroupAddresses(t *testing.T) {
 			},
 			{
 				// Update phone number & type
-				Config: generateBasicGroupResource(
+				Config: GenerateBasicGroupResource(
 					groupResource1,
 					groupName,
 					generateGroupAddress(
@@ -128,7 +128,7 @@ func TestAccResourceGroupAddresses(t *testing.T) {
 			},
 			{
 				// Remove number and set extension
-				Config: generateBasicGroupResource(
+				Config: GenerateBasicGroupResource(
 					groupResource1,
 					groupName,
 					generateGroupAddress(
@@ -145,7 +145,7 @@ func TestAccResourceGroupAddresses(t *testing.T) {
 			},
 			{
 				// Update the extension
-				Config: generateBasicGroupResource(
+				Config: GenerateBasicGroupResource(
 					groupResource1,
 					groupName,
 					generateGroupAddress(
@@ -190,7 +190,7 @@ func TestAccResourceGroupMembers(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create group with an owner and a member
-				Config: generateBasicGroupResource(
+				Config: GenerateBasicGroupResource(
 					groupResource,
 					groupName,
 					generateGroupOwners("genesyscloud_user."+userResource1+".id"),
@@ -211,7 +211,7 @@ func TestAccResourceGroupMembers(t *testing.T) {
 			},
 			{
 				// Make the owner a member
-				Config: generateBasicGroupResource(
+				Config: GenerateBasicGroupResource(
 					groupResource,
 					groupName,
 					generateGroupOwners("genesyscloud_user."+userResource1+".id"),
@@ -236,7 +236,7 @@ func TestAccResourceGroupMembers(t *testing.T) {
 			},
 			{
 				// Remove a member and change the owner
-				Config: generateBasicGroupResource(
+				Config: GenerateBasicGroupResource(
 					groupResource,
 					groupName,
 					generateGroupOwners("genesyscloud_user."+userResource2+".id"),
@@ -259,7 +259,7 @@ func TestAccResourceGroupMembers(t *testing.T) {
 			},
 			{
 				// Remove all members while deleting the user
-				Config: generateBasicGroupResource(
+				Config: GenerateBasicGroupResource(
 					groupResource,
 					groupName,
 					generateGroupOwners("genesyscloud_user."+userResource2+".id"),
@@ -306,7 +306,7 @@ func testVerifyGroupsDestroyed(state *terraform.State) error {
 	return nil
 }
 
-func generateBasicGroupResource(resourceID string, name string, nestedBlocks ...string) string {
+func GenerateBasicGroupResource(resourceID string, name string, nestedBlocks ...string) string {
 	return generateGroupResource(resourceID, name, nullValue, nullValue, nullValue, trueValue, nestedBlocks...)
 }
 

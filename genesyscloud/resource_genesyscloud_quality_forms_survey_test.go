@@ -11,7 +11,7 @@ import (
 	"github.com/mypurecloud/platform-client-sdk-go/v105/platformclientv2"
 )
 
-type surveyFormStruct struct {
+type SurveyFormStruct struct {
 	name           string
 	published      bool
 	disabled       bool
@@ -19,17 +19,17 @@ type surveyFormStruct struct {
 	language       string
 	header         string
 	footer         string
-	questionGroups []surveyFormQuestionGroupStruct
+	questionGroups []SurveyFormQuestionGroupStruct
 }
 
-type surveyFormQuestionGroupStruct struct {
+type SurveyFormQuestionGroupStruct struct {
 	name                string
 	naEnabled           bool
-	questions           []surveyFormQuestionStruct
+	questions           []SurveyFormQuestionStruct
 	visibilityCondition VisibilityConditionStruct
 }
 
-type surveyFormQuestionStruct struct {
+type SurveyFormQuestionStruct struct {
 	text                  string
 	helpText              string
 	varType               string
@@ -44,13 +44,13 @@ func TestAccResourceSurveyFormBasic(t *testing.T) {
 	formResource1 := "test-survey-form-1"
 
 	// Most basic survey form
-	surveyForm1 := surveyFormStruct{
+	surveyForm1 := SurveyFormStruct{
 		name:     "terraform-form-surveys-" + uuid.NewString(),
 		language: "en-US",
-		questionGroups: []surveyFormQuestionGroupStruct{
+		questionGroups: []SurveyFormQuestionGroupStruct{
 			{
 				name: "Test Question Group 1",
-				questions: []surveyFormQuestionStruct{
+				questions: []SurveyFormQuestionStruct{
 					{
 						text:    "Did the agent perform the opening spiel?",
 						varType: "multipleChoiceQuestion",
@@ -73,9 +73,9 @@ func TestAccResourceSurveyFormBasic(t *testing.T) {
 	// Duplicate form with additional questions
 	surveyForm2 := surveyForm1
 	surveyForm2.name = "terraform-survey-name-2"
-	surveyForm2.questionGroups = append(surveyForm2.questionGroups, surveyFormQuestionGroupStruct{
+	surveyForm2.questionGroups = append(surveyForm2.questionGroups, SurveyFormQuestionGroupStruct{
 		name: "Test Question Group 2",
-		questions: []surveyFormQuestionStruct{
+		questions: []SurveyFormQuestionStruct{
 			{
 				text:    "Yet another yes or no question.",
 				varType: "multipleChoiceQuestion",
@@ -120,7 +120,7 @@ func TestAccResourceSurveyFormBasic(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create
-				Config: generateSurveyFormResource(formResource1, &surveyForm1),
+				Config: GenerateSurveyFormResource(formResource1, &surveyForm1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("genesyscloud_quality_forms_survey."+formResource1, "name", surveyForm1.name),
 					resource.TestCheckResourceAttr("genesyscloud_quality_forms_survey."+formResource1, "published", falseValue),
@@ -132,7 +132,7 @@ func TestAccResourceSurveyFormBasic(t *testing.T) {
 			},
 			{
 				// Update and add some questions
-				Config: generateSurveyFormResource(formResource1, &surveyForm2),
+				Config: GenerateSurveyFormResource(formResource1, &surveyForm2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("genesyscloud_quality_forms_survey."+formResource1, "name", surveyForm2.name),
 					resource.TestCheckResourceAttr("genesyscloud_quality_forms_survey."+formResource1, "published", falseValue),
@@ -148,7 +148,7 @@ func TestAccResourceSurveyFormBasic(t *testing.T) {
 			},
 			{
 				// Publish Survey Form
-				Config: generateSurveyFormResource(formResource1, &surveyForm3),
+				Config: GenerateSurveyFormResource(formResource1, &surveyForm3),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("genesyscloud_quality_forms_survey."+formResource1, "name", surveyForm3.name),
 					resource.TestCheckResourceAttr("genesyscloud_quality_forms_survey."+formResource1, "published", trueValue),
@@ -173,15 +173,15 @@ func TestAccResourceSurveyFormComplete(t *testing.T) {
 	formResource1 := "test-survey-form-1"
 
 	// Complete survey form
-	surveyForm1 := surveyFormStruct{
+	surveyForm1 := SurveyFormStruct{
 		name:      "terraform-form-surveys-" + uuid.NewString(),
 		language:  "en-US",
 		published: false,
-		questionGroups: []surveyFormQuestionGroupStruct{
+		questionGroups: []SurveyFormQuestionGroupStruct{
 			{
 				name:      "Test Question Group 1",
 				naEnabled: false,
-				questions: []surveyFormQuestionStruct{
+				questions: []SurveyFormQuestionStruct{
 					{
 						text:                  "Would you recommend our services?",
 						varType:               "npsQuestion",
@@ -213,7 +213,7 @@ func TestAccResourceSurveyFormComplete(t *testing.T) {
 			},
 			{
 				name: "Test Question Group 2",
-				questions: []surveyFormQuestionStruct{
+				questions: []SurveyFormQuestionStruct{
 					{
 						text:    "Did the agent offer to sell product?",
 						varType: "multipleChoiceQuestion",
@@ -247,7 +247,7 @@ func TestAccResourceSurveyFormComplete(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create
-				Config: generateSurveyFormResource(formResource1, &surveyForm1),
+				Config: GenerateSurveyFormResource(formResource1, &surveyForm1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("genesyscloud_quality_forms_survey."+formResource1, "name", surveyForm1.name),
 					resource.TestCheckResourceAttr("genesyscloud_quality_forms_survey."+formResource1, "published", falseValue),
@@ -281,14 +281,14 @@ func TestAccResourceSurveyFormRepublishing(t *testing.T) {
 	formResource1 := "test-survey-form-1"
 
 	// Most basic survey form
-	surveyForm1 := surveyFormStruct{
+	surveyForm1 := SurveyFormStruct{
 		name:      "terraform-form-surveys-" + uuid.NewString(),
 		language:  "en-US",
 		published: true,
-		questionGroups: []surveyFormQuestionGroupStruct{
+		questionGroups: []SurveyFormQuestionGroupStruct{
 			{
 				name: "Test Question Group 1",
-				questions: []surveyFormQuestionStruct{
+				questions: []SurveyFormQuestionStruct{
 					{
 						text:    "Was your problem solved?",
 						varType: "multipleChoiceQuestion",
@@ -318,21 +318,21 @@ func TestAccResourceSurveyFormRepublishing(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Publish form on creation
-				Config: generateSurveyFormResource(formResource1, &surveyForm1),
+				Config: GenerateSurveyFormResource(formResource1, &surveyForm1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("genesyscloud_quality_forms_survey."+formResource1, "published", trueValue),
 				),
 			},
 			{
 				// Unpublish
-				Config: generateSurveyFormResource(formResource1, &surveyForm2),
+				Config: GenerateSurveyFormResource(formResource1, &surveyForm2),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("genesyscloud_quality_forms_survey."+formResource1, "published", falseValue),
 				),
 			},
 			{
 				// republish
-				Config: generateSurveyFormResource(formResource1, &surveyForm1),
+				Config: GenerateSurveyFormResource(formResource1, &surveyForm1),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("genesyscloud_quality_forms_survey."+formResource1, "published", trueValue),
 				),
@@ -376,7 +376,7 @@ func testVerifySurveyFormDestroyed(state *terraform.State) error {
 	return nil
 }
 
-func generateSurveyFormResource(resourceID string, surveyForm *surveyFormStruct) string {
+func GenerateSurveyFormResource(resourceID string, surveyForm *SurveyFormStruct) string {
 	form := fmt.Sprintf(`resource "genesyscloud_quality_forms_survey" "%s" {
 		name = "%s"
 		published = %v
@@ -419,7 +419,7 @@ func generateLifeCycle() string {
 	`
 }
 
-func generateSurveyFormQuestionGroups(questionGroups *[]surveyFormQuestionGroupStruct) string {
+func generateSurveyFormQuestionGroups(questionGroups *[]SurveyFormQuestionGroupStruct) string {
 	if questionGroups == nil {
 		return ""
 	}
@@ -446,7 +446,7 @@ func generateSurveyFormQuestionGroups(questionGroups *[]surveyFormQuestionGroupS
 	return questionGroupsString
 }
 
-func generateSurveyFormQuestions(questions *[]surveyFormQuestionStruct) string {
+func generateSurveyFormQuestions(questions *[]SurveyFormQuestionStruct) string {
 	if questions == nil {
 		return ""
 	}

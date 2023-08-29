@@ -23,7 +23,7 @@ func TestAccResourceRoutingEmailDomainSub(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cleanupRoutingEmailDomains()
+	CleanupRoutingEmailDomains()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { TestAccPreCheck(t) },
@@ -31,7 +31,7 @@ func TestAccResourceRoutingEmailDomainSub(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create purecloud subdomain
-				Config: generateRoutingEmailDomainResource(
+				Config: GenerateRoutingEmailDomainResource(
 					domainRes,
 					domainId,
 					trueValue, // Subdomain clear
@@ -64,7 +64,7 @@ func TestAccResourceRoutingEmailDomainCustom(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cleanupRoutingEmailDomains()
+	CleanupRoutingEmailDomains()
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { TestAccPreCheck(t) },
@@ -72,7 +72,7 @@ func TestAccResourceRoutingEmailDomainCustom(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create custom domain
-				Config: generateRoutingEmailDomainResource(
+				Config: GenerateRoutingEmailDomainResource(
 					domainRes,
 					domainId,
 					falseValue, // Subdomain
@@ -86,7 +86,7 @@ func TestAccResourceRoutingEmailDomainCustom(t *testing.T) {
 			},
 			{
 				// Update custom domain
-				Config: generateRoutingEmailDomainResource(
+				Config: GenerateRoutingEmailDomainResource(
 					domainRes,
 					domainId,
 					falseValue, // Subdomain
@@ -103,7 +103,7 @@ func TestAccResourceRoutingEmailDomainCustom(t *testing.T) {
 	})
 }
 
-func generateRoutingEmailDomainResource(
+func GenerateRoutingEmailDomainResource(
 	resourceID string,
 	domainID string,
 	subdomain string,

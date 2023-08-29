@@ -71,3 +71,62 @@ func DataSourceIntegration() *schema.Resource {
 		},
 	}
 }
+
+func ResourceCredential() *schema.Resource {
+	return &schema.Resource{
+		Description: "Genesys Cloud Credential",
+
+		CreateContext: gcloud.CreateWithPooledClient(createCredential),
+		ReadContext:   gcloud.ReadWithPooledClient(readCredential),
+		UpdateContext: gcloud.UpdateWithPooledClient(updateCredential),
+		DeleteContext: gcloud.DeleteWithPooledClient(deleteCredential),
+		Importer: &schema.ResourceImporter{
+			StateContext: schema.ImportStatePassthroughContext,
+		},
+		SchemaVersion: 1,
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Description: "Credential name.",
+				Type:        schema.TypeString,
+				Optional:    true,
+			},
+			"credential_type_name": {
+				Description: "Credential type name. Use [GET /api/v2/integrations/credentials/types](https://developer.genesys.cloud/api/rest/v2/integrations/#get-api-v2-integrations-credentials-types) to see the list of available integration credential types. ",
+				Type:        schema.TypeString,
+				Required:    true,
+			},
+			"fields": {
+				Description: "Credential fields. Different credential types require different fields. Missing any correct required fields will result API request failure. Use [GET /api/v2/integrations/credentials/types](https://developer.genesys.cloud/api/rest/v2/integrations/#get-api-v2-integrations-credentials-types) to check out the specific credential type schema to find out what fields are required. ",
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Computed:    true,
+				Sensitive:   true,
+				Elem:        &schema.Schema{Type: schema.TypeString},
+			},
+		},
+	}
+}
+
+func CredentialExporter() *resourceExporter.ResourceExporter {
+	return &resourceExporter.ResourceExporter{
+		GetResourcesFunc: gcloud.GetAllWithPooledClient(getAllCredentials),
+		RefAttrs:         map[string]*resourceExporter.RefAttrSettings{}, // No Reference
+		UnResolvableAttributes: map[string]*schema.Schema{
+			"fields": ResourceCredential().Schema["fields"],
+		},
+	}
+}
+
+func DataSourceIntegrationCredential() *schema.Resource {
+	return &schema.Resource{
+		Description: "Data source for Genesys Cloud integration credential. Select an integration credential by name",
+		ReadContext: gcloud.ReadWithPooledClient(dataSourceIntegrationCredentialRead),
+		Schema: map[string]*schema.Schema{
+			"name": {
+				Description: "The name of the integration credential",
+				Type:        schema.TypeString,
+				Required:    true,
+			},
+		},
+	}
+}

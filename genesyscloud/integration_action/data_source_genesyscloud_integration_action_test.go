@@ -29,7 +29,7 @@ func TestAccDataSourceIntegrationAction(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// Create without config
-				Config: generateIntegrationResource(
+				Config: GenerateIntegrationResource(
 					integResource1,
 					nullValue,
 					strconv.Quote(integTypeID),

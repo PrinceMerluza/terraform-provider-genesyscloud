@@ -6,12 +6,13 @@ import (
 	"strconv"
 	"strings"
 
+	lists "terraform-provider-genesyscloud/genesyscloud/util/lists"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/mypurecloud/platform-client-sdk-go/v105/platformclientv2"
-	lists "terraform-provider-genesyscloud/genesyscloud/util/lists"
 )
 
 var (
@@ -173,7 +174,7 @@ func roleDivPairsToGrants(grantPairs []string) platformclientv2.Roledivisiongran
 }
 
 // Testing common
-func generateResourceRoles(skillID string, divisionIds ...string) string {
+func GenerateResourceRoles(skillID string, divisionIds ...string) string {
 	var divAttr string
 	if len(divisionIds) > 0 {
 		divAttr = "division_ids = [" + strings.Join(divisionIds, ",") + "]"

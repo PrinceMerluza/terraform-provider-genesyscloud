@@ -8,6 +8,7 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 
+	gcloud "terraform-provider-genesyscloud/genesyscloud"
 	resourceExporter "terraform-provider-genesyscloud/genesyscloud/resource_exporter"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -34,14 +35,14 @@ var (
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
-				DiffSuppressFunc: suppressEquivalentJsonDiffs,
+				DiffSuppressFunc: gcloud.SuppressEquivalentJsonDiffs,
 			},
 			"advanced": {
 				Description:      "Integration advanced config (JSON string).",
 				Type:             schema.TypeString,
 				Optional:         true,
 				Computed:         true,
-				DiffSuppressFunc: suppressEquivalentJsonDiffs,
+				DiffSuppressFunc: gcloud.SuppressEquivalentJsonDiffs,
 			},
 			"credentials": {
 				Description: "Credentials required for the integration. The required keys are indicated in the credentials property of the Integration Type.",
@@ -81,7 +82,7 @@ func createIntegration(ctx context.Context, d *schema.ResourceData, meta interfa
 	intendedState := d.Get("intended_state").(string)
 	integrationType := d.Get("integration_type").(string)
 
-	sdkConfig := meta.(*ProviderMeta).ClientConfig
+	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
 	integrationAPI := platformclientv2.NewIntegrationsApiWithConfig(sdkConfig)
 
 	createIntegration := platformclientv2.Createintegrationrequest{
@@ -124,17 +125,17 @@ func createIntegration(ctx context.Context, d *schema.ResourceData, meta interfa
 }
 
 func readIntegration(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	sdkConfig := meta.(*ProviderMeta).ClientConfig
+	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
 	integrationAPI := platformclientv2.NewIntegrationsApiWithConfig(sdkConfig)
 
 	log.Printf("Reading integration %s", d.Id())
 
-	return WithRetriesForRead(ctx, d, func() *resource.RetryError {
+	return gcloud.WithRetriesForRead(ctx, d, func() *resource.RetryError {
 		const pageSize = 100
 		const pageNum = 1
 		currentIntegration, resp, getErr := integrationAPI.GetIntegration(d.Id(), pageSize, pageNum, "", nil, "", "")
 		if getErr != nil {
-			if IsStatus404(resp) {
+			if gcloud.IsStatus404(resp) {
 				return resource.RetryableError(fmt.Errorf("Failed to read integration %s: %s", d.Id(), getErr))
 			}
 			return resource.NonRetryableError(fmt.Errorf("Failed to read integration %s: %s", d.Id(), getErr))
@@ -166,7 +167,7 @@ func updateIntegration(ctx context.Context, d *schema.ResourceData, meta interfa
 
 	intendedState := d.Get("intended_state").(string)
 
-	sdkConfig := meta.(*ProviderMeta).ClientConfig
+	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
 	integrationAPI := platformclientv2.NewIntegrationsApiWithConfig(sdkConfig)
 
 	diagErr, name := updateIntegrationConfig(d, integrationAPI)
@@ -193,7 +194,7 @@ func updateIntegration(ctx context.Context, d *schema.ResourceData, meta interfa
 
 func deleteIntegration(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 
-	sdkConfig := meta.(*ProviderMeta).ClientConfig
+	sdkConfig := meta.(*gcloud.ProviderMeta).ClientConfig
 	integrationAPI := platformclientv2.NewIntegrationsApiWithConfig(sdkConfig)
 
 	_, _, err := integrationAPI.DeleteIntegration(d.Id())
@@ -201,12 +202,12 @@ func deleteIntegration(ctx context.Context, d *schema.ResourceData, meta interfa
 		return diag.Errorf("Failed to delete the integration %s: %s", d.Id(), err)
 	}
 
-	return WithRetries(ctx, 30*time.Second, func() *resource.RetryError {
+	return gcloud.WithRetries(ctx, 30*time.Second, func() *resource.RetryError {
 		const pageSize = 100
 		const pageNum = 1
 		_, resp, err := integrationAPI.GetIntegration(d.Id(), pageSize, pageNum, "", nil, "", "")
 		if err != nil {
-			if IsStatus404(resp) {
+			if gcloud.IsStatus404(resp) {
 				// Integration deleted
 				log.Printf("Deleted Integration %s", d.Id())
 				return nil

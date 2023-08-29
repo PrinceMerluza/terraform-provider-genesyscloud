@@ -9,7 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func suppressEquivalentJsonDiffs(k, old, new string, d *schema.ResourceData) bool {
+func SuppressEquivalentJsonDiffs(k, old, new string, d *schema.ResourceData) bool {
 	if old == new {
 		return true
 	}
